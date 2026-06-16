@@ -8,8 +8,6 @@
 
 **Learning objective**: Get hands-on experience turning an ad-hoc coding-agent evaluation script into an automated, observable, versioned, and durable Airflow pipeline with a structured data footprint: datasets, artifacts, metadata, metrics, logs, and trajectories.
 
-**Non-goals**: Deep dive into Airflow internals, SWE-bench internals, LLM fine-tuning theory, or sandbox infrastructure. The point is to connect the pieces into a usable evaluation system. Fine-tuning is left as an optional extension.
-
 **Inspired by**: https://github.com/GlebBerjoskin/mlops-assignment
 
 ---
@@ -34,9 +32,38 @@ Right now the researchers have several scripts on one VM. Someone SSHes in, runs
 
 So, the team needs your help to turn these ad-hoc scripts into reliable, multi-user pipelines.
 
-**Assignment scope**. Productionize the first loop: evaluate the agent reliably. Researchers should be able to submit a batch of evaluation experiments, run them on a remote VM, inspect MLflow results and mini-swe-agent trajectories, and rerun the same config later.
+## Task
 
-**For avid learners**. Design & productionize train-model & evaluate-agent part.
+You are provided with ad-hoc scripts in `scripts/` to run [mini-swe-agent](https://github.com/SWE-agent/mini-swe-agent) and evaluate the results using [SWE-bench](https://github.com/swe-bench/SWE-bench).
+
+Sample outputs of `scripts/mini-swe-bench-batch.sh` and `scripts/swe-bench-eval.sh` are available in `sample/`.
+
+Your goal is to turn these ad-hoc scripts from `scripts/` into a proper, configurable Airflow pipeline that implements the basic  `run-agent -> run-evaluation` workflow: run `mini-swe-agent` on a subset of SWE-bench instances and evaluate the results.
+
+As a starting point with Airflow, you are provided with `run-airflow-standalone.sh` and a dag in `dags/` that re-implements `scripts/mini-swe-bench-single.sh`.
+
+**Airflow pipeline requirements**:
+- Configurable from Airflow parameters: `--split`, `--subset`, `--worker`. No hard-code.
+- All run artifacts are properly structured. E.g.,
+```
+runs/
+  <<run-id>>/
+    run-agent/
+      astropy__astropy-12907/
+      preds.json
+    run-eval/
+```
+- Run artifacts are saved to a remote long-term storage, such as Object Storage (S3).
+- It's possible to re-construct the run based on the produced `<<run-id>>` folder: input SWE-bench tasks, configuration, output trajectories, etc. Basically, you can just send a directory to someone -- and they will be able to grab the whole picture.
+- Airflow pipelines uses `DockerOperator` to run the scripts in isolated environments, instead of calling `uv run`. `Dockerfile` for the project is provided. In large-scale production, `DockerOperator` can be replaced with `KubernetesPodOperator`.
+- Each run metrics and parameters are logged to `MLflow`, one can easily compare different runs.
+
+**Deployment**
+1. Airflow is deployed locally on a VM using `docker compose`: https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#running-airflow-in-docker
+2. MLflow is deployed locally as a part of the same `docker-compose.yaml`.
+
+Ultimately, the pipeline may look like: `run-mini-swe-agent` -> `swe-bench-eval` -> `log-artifacts-to-s3` -> `log-metrics-to-mlflow`.
+
 ---
 
 ## Why This Matters
@@ -47,7 +74,6 @@ By the end of the assignment you should be able to:
 - Use Airflow for orchestration instead of manual shell ordering.
 - Track experiment configs, datasets, model IDs, metrics, artifacts, and logs in MLflow.
 - Run coding-agent evaluations in user-provided Docker images and collect reproducible outputs.
-- Keep Airflow code on a remote VM updated automatically from Git or S3.
 - Deploy and use the mini-swe-agent trajectory viewer to inspect what happened inside an agent run.
 - Compare multiple experiments without losing track of which code, prompt, dataset, and model produced each result.
 
@@ -55,249 +81,94 @@ If done carefully, this assignment teaches the practical MLOps discipline that r
 
 ---
 
-## Target System
-
-The mandatory assignment has one Airflow pipeline and two supporting services:
-
-1. `evaluate-agent`: run `mini-swe-agent` on a configurable SWE-bench-like task set and save enough metrics and artifacts to reproduce and diagnose the run.
-2. **MLflow**: track experiment configs, metrics, artifacts, and run metadata.
-3. **Trajectory viewer**: serve mini-swe-agent trajectories so failures can be inspected visually.
-
-There is also an optional extension:
-
-- `train-model` and `train-model-and-evaluate-agent`: fine-tune an LLM on agent trajectories, then evaluate the resulting model with the same `evaluate-agent` pipeline.
-
-The expected stack:
-
-- **Airflow** as the pipeline engine.
-- **MLflow** as the experiment tracker.
-- **mini-swe-agent** as the research-friendly coding agent.
-- **SWE-bench** or a supplied SWE-bench-like subset as the evaluation harness.
-- **User-provided Docker images** as the execution environment for pipeline actions.
-- **Managed LLM inference** via API, for example Nebius Token Factory Inference, AWS Bedrock, Together AI, or another OpenAI-compatible endpoint.
-- Optional: **managed code sandboxes** via API, for example Nebius Token Factory Sandboxes, Daytona, Modal, or E2B.
-- Optional: **managed LLM fine-tuning** via API, for example Nebius Token Factory Fine-Tuning, AWS Bedrock, Together AI, or another equivalent service.
-
-Managed services are intentional. In real production you might self-host some pieces, for example vLLM on Kubernetes, but this assignment is about pipeline design and experiment discipline, not cluster operations.
-
----
-
 ## Prerequisites
 
-- A CPU VM or workstation where you can run Airflow, MLflow, Docker, and Python jobs.
-- Docker and Docker Compose.
-- Python 3.11+ and `uv`.
-- Access credentials for:
-  - an OpenAI-compatible inference endpoint
-- Optional, for extensions:
-  - a fine-tuning endpoint
-  - a sandbox provider
-- Enough API quota to run the required experiments.
+- A CPU VM with 8 CPU, 32 GB RAM, public IP. Can be created in Nebius.
+- `NEBIUS_API_KEY` for Nebius Token Factory
 
-You do not need a GPU VM for the orchestration parts. The expensive work should happen behind managed APIs.
+
+You do not need a GPU VM for the orchestration parts. The inference part is handled by managed APIs.
 
 ---
 
 ## Phase 0: Setup
 
-You will work on a VM. Airflow and MLflow can run locally on that VM, and their UIs can be reached from your laptop by forwarding ports.
+Create a VM with 8 CPU, 32 GB RAM, public IP. Add your public SSH key.
 
-You usually need these ports:
+For simplicity, add this VM to your `~/.ssh/config`, for instance:
 
-- **8080**: Airflow UI
-- **5000**: MLflow UI
-- **8001**: mini-swe-agent trajectory viewer, or whichever port your deployment uses
-- **9001**: optional object-store UI, if your scaffold uses MinIO
-
-**VSCode or Cursor.** Use Remote-SSH, connect to the VM, and forward the ports from the editor's Ports panel.
-
-**Plain SSH fallback.**
-
-```bash
-ssh -L 8080:localhost:8080 \
-    -L 5000:localhost:5000 \
-    -L 8001:localhost:8001 \
-    -L 9001:localhost:9001 \
-    <user>@<vm-host>
+```
+Host sbkarasik-academy-playground
+  HostName 89.169.100.8
+  User sbkarasik
+  ForwardAgent yes
 ```
 
-Once connected, set up the starter repo:
+Connect to the VM. 
+
+Install the basic tools:
+```bash
+# uv 
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Docker
+# Add Docker's official GPG key:
+sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# Let your user use `docker` without `sudo`
+sudo usermod -aG docker "$USER"
+sudo newgrp docker
+```
+
+Set up the starter repo:
 
 ```bash
 git clone <repo-url>
 cd <repo-folder>
 uv sync
 cp .env.example .env
-docker compose up -d
 ```
 
-Put service credentials and endpoint URLs in `.env`. Do not commit secrets.
 
-Airflow must run on the remote VM. Pipeline code should update automatically from Git or S3; manually SSHing into the VM and editing DAG files is not an acceptable operating model. The exact mechanism is up to you: `git-sync`, a scheduled pull, object-store sync, or another documented approach.
-
-### What you should have in the end
-
-- Airflow reachable at `http://localhost:8080`
-- MLflow reachable at `http://localhost:5000`
-- mini-swe-agent trajectory viewer reachable from your laptop browser
-- `.env` configured with inference and tracking settings
-- Airflow DAG code updated automatically from Git or S3
-- A successful Airflow test run of a trivial DAG
-
----
-
-## Starter Scaffold
-
-The starter repo gives you just enough to begin, not a finished solution:
-
-- Minimal VM or Docker Compose setup for Airflow and MLflow.
-- A minimal `evaluate-agent` DAG that can run one hard-coded evaluation locally.
-- A minimal trajectory viewer deployment hook or placeholder.
-- Helper code for reading configs, calling provider APIs, and writing artifacts.
-
-The scaffold is intentionally incomplete. Your task is to make it configurable, reliable, observable, and useful for the milestones below.
-
----
-
-## Phase 1: `evaluate-agent`
-
-Start with evaluation. This phase should be useful on its own: if you stop here, you have still built a reproducible experiment loop for comparing coding-agent harness changes.
-
-The evaluation pipeline runs a coding agent on a configurable batch of SWE-bench-like tasks, judges the produced patches, and records enough evidence to compare runs later.
-
-### Define the experiment contract
-
-Before wiring the DAG, define how a researcher asks for an evaluation run.
-
-The config should cover the knobs needed for harness experiments: task subset, prompt version, model ID, decoding settings, execution image, timeouts, and retries. It should also make the run traceable back to code, config, data, prompt, and model.
-
-Decide where evaluation artifacts live. The exact structure is up to you, but a future teammate should be able to find the config, per-task evidence, aggregate metrics, and any external artifact references.
-
-Example:
-
-```text
-artifacts/
-  evaluate-agent/<run_id>/
-    config.yaml
-    task_outputs/
-    metrics.json
+Install the dependencies:
+```bash
+uv sync
 ```
 
-### Build the DAG
+Activate the venv: `source .venv/bin/activate`.
 
-The DAG should load the config, materialize the task set, run `mini-swe-agent`, judge the results with SWE-bench, and aggregate metrics into MLflow.
+Add your `NEBIUS_API_KEY` to `.env`.
 
-Use Airflow structure to expose the shape of the work. Do not hide the whole run inside one giant Python function.
+**Check your setup**:
+- Run the script: `bash scripts/mini-swe-bench-single.sh`
+- Via Airflow:
+  - Run the Airflow: `bash run-airflow-standalone`
+  - Forward port `8080` -- this is where Airflow is running.
+    - VSCode/Cursor may do it automatically for you.
+    - Pain SSH: `ssh -L 8080:localhost:8080 <user>@<vm-host>`.
+  - Open it: http://localhost:8080
+  - Try running the example DAG `mini-swe-bench-single`.
 
-Pipeline actions must execute inside user-provided Docker images. The image should be part of the run config or otherwise clearly controlled by the user. A researcher should be able to change the agent/evaluation environment by changing the image reference rather than rebuilding the Airflow VM.
 
-Persist enough per-task information to debug, rerun, and judge the task later. At minimum, you should be able to recover what was attempted, what patch or answer was produced, whether it failed, and where the relevant evidence is.
-
-Choose metrics that make runs comparable and diagnosable. They should cover quality, failures, runtime, and resource usage or cost where available. Examples include resolved rate, timeout rate, p95 runtime, token usage, and execution-environment failure rate.
-
-### Run evaluation experiments
-
-Run a small but meaningful experiment matrix with a fixed evaluation task set:
-
-1. **Baseline**: one prompt, one model, one decoding config.
-2. **Prompt versions**: three harness prompt variants. For example: baseline, concise, and repair-heavy.
-3. **Temperature**: at least three values. For example: `0.0`, `0.2`, and `0.7`.
-
-Keep unrelated variables fixed inside each comparison. The point is not only to get a best score; the point is to make a comparison you can defend.
-
-### Read the outcomes
-
-Use MLflow and your saved artifacts to answer:
-
-- Which prompt performed best on the chosen task set?
-- Did temperature change quality, failure rate, runtime, or cost?
-- Which failures are agent failures, execution-environment failures, or evaluation failures?
-- Can someone rerun the exact same experiment from the committed config?
-
-Open the trajectory viewer and inspect at least a few successful and failed runs. The viewer should make the agent's decisions, tool calls, and failure modes easier to understand than raw logs alone.
-
-Add the evaluation section to `REPORT.md`. Include the run table, a short interpretation, and one or two concrete examples of failures you inspected through the trajectory viewer or artifacts.
-
-### What you should have in the end
-
-- `evaluate-agent` DAG with configurable task subset, prompt, model, and decoding parameters
-- Evaluation configs committed under `configs/experiments/evaluate-agent/`
-- Durable per-task evidence and aggregate metrics
-- MLflow runs comparing baseline, prompt versions, and temperatures
-- `results/evaluate_agent_baseline.json`
-- `results/evaluate_agent_experiments.json`
-- Airflow screenshot showing mapped evaluation tasks (`screenshots/airflow_evaluate_agent.png`)
-- MLflow screenshot showing evaluation runs side by side (`screenshots/mlflow_evaluate_agent.png`)
-- Trajectory viewer screenshot showing an inspected mini-swe-agent run (`screenshots/trajectory_viewer.png`)
-- A `REPORT.md` section explaining the evaluation setup and outcomes
-
-This is a complete first milestone. A submission that only completes this phase should still demonstrate reproducible pipeline design, experiment tracking, failure diagnosis, and honest comparison.
-
----
-
-## Phase 2: Reliability And Operations
-
-This assignment is not only about green runs. It is about building pipelines someone else can trust.
-
-### What to do
-
-1. Add retries only where retrying is safe.
-2. Add timeouts to Docker-executed actions, provider calls, and evaluation steps.
-3. Make failed tasks diagnosable from Airflow logs and saved artifacts.
-4. Make repeated runs reproducible from a committed config.
-5. Ensure partial failures do not erase successful per-task artifacts.
-6. Add a short "how to rerun" section to `REPORT.md`.
-
-You should be able to answer:
-
-- Which tasks failed?
-- Why did they fail?
-- Which model and prompt were used?
-- Which dataset rows were used?
-- Where is the evidence needed to debug the run?
-- Can I rerun this exact config tomorrow?
-
-### What you should have in the end
-
-- Sensible Airflow retries and timeouts
-- Per-task failure records
-- Notes on code sync, Docker image selection, retries, and reruns
-- Clear runbook notes in `REPORT.md`
-
----
-
-## Phase 3: Report
-
-Write `REPORT.md`. Keep it concise: 2-3 pages is enough.
-
-It should include:
-
-1. Architecture overview: Airflow, MLflow, trajectory viewer, Docker execution images, inference endpoint, artifact storage.
-2. Pipeline contract: key config fields and artifact layout.
-3. Evaluation results: baseline, prompt experiments, temperature experiments.
-4. Reliability notes: VM deployment, automatic code updates from Git/S3, retries, timeouts, and failure handling.
-5. Cost and runtime summary.
-6. What you would improve with more time. Be specific.
-
-Do not hide bad results. A weak prompt experiment or failed task batch is still useful if you can explain what happened and show reliable measurement.
-
----
-
-## Optional Extensions
-
-If you finish the mandatory scope and want to go further, extend the same experiment platform to model training.
-
-### `train-model`
-
-Build a DAG that fine-tunes an LLM on a configurable subset of agent trajectories, such as `SWE-rebench-openhands-trajectories`. It should prepare data, launch the provider fine-tuning job, track the provider job and resulting model ID, and log training metadata to MLflow.
-
-### `train-model-and-evaluate-agent`
-
-Compose training with the mandatory `evaluate-agent` pipeline. The fine-tuned model ID should flow into evaluation without manual copy-paste, and MLflow should make the relationship between training and evaluation runs visible.
-
-Suggested experiment: train on 10 / 100 / 1000 trajectories, keep the evaluation set fixed, and compare against the mandatory evaluation baseline. The important question is whether fine-tuning improves quality enough to justify the extra system complexity.
-
----
+Congratulations! Your are all set.
 
 ## Final Deliverables
 
@@ -339,10 +210,3 @@ We care more about engineering judgment and traceability than about one lucky me
 | **Experiment rigor** | 10% | Baseline, prompt, and temperature experiments are comparable, reproducible, and interpreted honestly. |
 | **Report and runbook** | 10% | `REPORT.md` is concise, includes rerun instructions, explains failures, and states what would be improved next. |
 
----
-
-## Practical Advice
-
-Start small. First make one evaluation task run end to end and log one metric. Then run it inside the configured Docker image. Then fan out to a task batch. Then compare prompts and temperatures.
-
-The most common failure mode in this assignment is trying to build the full platform in one pass. A boring pipeline that records every input and output is better than a clever one that only works once.
