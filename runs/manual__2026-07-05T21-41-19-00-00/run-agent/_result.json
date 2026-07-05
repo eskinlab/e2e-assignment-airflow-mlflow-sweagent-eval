@@ -1,0 +1,5 @@
+{
+  "preds_path": "run-agent/preds.json",
+  "returncode": 0,
+  "trajectories_dir": "run-agent"
+}

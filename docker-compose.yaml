@@ -1,0 +1,141 @@
+# Phase 3 "production-style mode": Airflow + MLflow (+ a local MinIO standing in for
+# S3/Nebius Object Storage) via docker compose. Minimal on purpose - LocalExecutor +
+# Postgres, no Celery/Redis/worker/triggerer.
+#
+# The evaluate_agent DAG's tasks are DockerOperator: airflow-scheduler launches them as
+# *sibling* containers against the host Docker daemon (docker-outside-of-docker), via the
+# /var/run/docker.sock bind mount below - not nested inside the scheduler container. That
+# also means HOST_PROJECT_ROOT (see .env.example) has to be this repo's path as the host
+# sees it, not `/opt/airflow` as the scheduler container sees it.
+#
+# Before `docker compose up`:
+#   docker build -t mlops-assignment-pipeline:latest .
+#   cp .env.example .env   # then fill in NEBIUS_API_KEY, HOST_PROJECT_ROOT, DOCKER_GID
+
+x-airflow-common: &airflow-common
+  image: apache/airflow:2.10.4-python3.12
+  environment: &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
+    # Not recommended for real production images (rebuilds on every container start),
+    # but keeps this compose file to a single Dockerfile (the pipeline one) for a
+    # course assignment of this size.
+    _PIP_ADDITIONAL_REQUIREMENTS: apache-airflow-providers-docker
+    PIPELINE_IMAGE: mlops-assignment-pipeline:latest
+    PIPELINE_DOCKER_NETWORK: ${COMPOSE_PROJECT_NAME:-mlops-assignment-e2e-ml-pipeline}_default
+    HOST_PROJECT_ROOT: ${HOST_PROJECT_ROOT}
+    MLFLOW_TRACKING_URI: http://mlflow:5000
+    MLFLOW_EXPERIMENT_NAME: swe-bench-agent-eval
+    NEBIUS_API_KEY: ${NEBIUS_API_KEY}
+    S3_BUCKET: ${S3_BUCKET:-mlops-assignment-runs}
+    S3_ENDPOINT_URL: http://minio:9000
+    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-minioadmin}
+    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-minioadmin}
+    AWS_REGION: ${AWS_REGION:-us-east-1}
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./runs:/opt/airflow/runs
+    - airflow-logs:/opt/airflow/logs
+    - /var/run/docker.sock:/var/run/docker.sock
+  # DOCKER_GID lets the airflow user read/write the mounted host docker socket, e.g.
+  # `getent group docker | cut -d: -f3` on the host. Required on Linux hosts/VMs; not
+  # needed with Docker Desktop (Mac/Windows), where the socket is already world-usable.
+  group_add:
+    - "${DOCKER_GID:-999}"
+  depends_on: &airflow-common-depends-on
+    postgres:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+    restart: unless-stopped
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.16.2
+    command: >
+      mlflow server --host 0.0.0.0 --port 5000
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --default-artifact-root /mlflow/artifacts
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow-data:/mlflow
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:-minioadmin}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      retries: 5
+    restart: unless-stopped
+
+  airflow-init:
+    <<: *airflow-common
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow db migrate
+        airflow users create \
+          --username admin --password admin \
+          --firstname admin --lastname admin \
+          --role Admin --email admin@example.com || true
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    healthcheck:
+      test: ["CMD", "airflow", "jobs", "check", "--job-type", "SchedulerJob", "--hostname", "$${HOSTNAME}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+volumes:
+  postgres-db-volume:
+  airflow-logs:
+  mlflow-data:
+  minio-data:

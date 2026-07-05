@@ -1,0 +1,35 @@
+{
+  "config_path": "config.json",
+  "created_at": "2026-07-05T21:41:40.748964+00:00",
+  "git_sha": "e1cfa8b",
+  "metrics_path": "metrics.json",
+  "metrics_summary": {
+    "completed_instances": 0,
+    "empty_patch_instances": 3,
+    "error_instances": 0,
+    "resolve_rate": 0.0,
+    "resolved_instances": 0,
+    "submitted_instances": 3,
+    "total_instances": 500,
+    "unresolved_instances": 0
+  },
+  "mlflow": {
+    "mlflow_artifact_uri": "/mlflow/artifacts/1/9f63e4dc1bc648b79d2af1a70750b317/artifacts",
+    "mlflow_experiment_id": "1",
+    "mlflow_run_id": "9f63e4dc1bc648b79d2af1a70750b317",
+    "mlflow_tracking_uri": "http://mlflow:5000"
+  },
+  "remote_artifact_uri": "s3://mlops-assignment-runs/runs/manual__2026-07-05T21-41-19-00-00/",
+  "run_agent": {
+    "log_path": "run-agent/minisweagent.log",
+    "output_dir": "run-agent",
+    "preds_path": "run-agent/preds.json",
+    "returncode": 0
+  },
+  "run_eval": {
+    "eval_dir": "run-eval",
+    "returncode": 0,
+    "summary_path": "run-eval/nebius__moonshotai__Kimi-K2.6.manual__2026-07-05T21-41-19-00-00.json"
+  },
+  "run_id": "manual__2026-07-05T21-41-19-00-00"
+}

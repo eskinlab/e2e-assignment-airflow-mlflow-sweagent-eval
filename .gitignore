@@ -10,3 +10,8 @@ __pycache__
 
 mini-swe-agent/
 SWE-bench/
+
+/runs/*
+!/runs/manual__2026-07-05T21-41-19-00-00/
+/mlruns/
+/mlflow.db*
