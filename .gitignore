@@ -15,3 +15,4 @@ SWE-bench/
 !/runs/manual__2026-07-05T21-41-19-00-00/
 /mlruns/
 /mlflow.db*
+.claude/

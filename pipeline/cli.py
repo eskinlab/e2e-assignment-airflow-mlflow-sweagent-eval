@@ -12,7 +12,7 @@ import json
 import sys
 from pathlib import Path
 
-from pipeline.agent import run_agent_batch
+from pipeline.agents import run_agent_batch
 from pipeline.config import build_run_config
 from pipeline.eval import run_swebench_eval
 from pipeline.metrics import collect_metrics

@@ -9,7 +9,7 @@ configurable Airflow DAG (`dags/evaluate_agent.py`) that runs `mini-swe-agent` o
 SWE-bench, evaluates the resulting patches, writes a self-contained `runs/<run_id>/` folder, and
 logs params/metrics to MLflow.
 
-![Full architecture: docker-compose control plane, dynamic DockerOperator tasks, per-instance agent/eval containers, and backing services](screenshots/architecture.png)
+![Full architecture: docker-compose control plane, dynamic DockerOperator tasks, per-instance agent/eval containers, and backing services](docs/architecture.png)
 
 ### Two environments, one repo
 
@@ -22,7 +22,7 @@ from the project's own `Dockerfile` / `uv.lock`).
 `docker.types.Mount`. Every pipeline step (`prepare-run` / `run-agent` / `run-eval` /
 `summarize` / `upload`) runs as its own **`DockerOperator`** task — a container built from
 `Dockerfile`, whose `ENTRYPOINT` is `python -m pipeline.cli` — dispatching to
-`pipeline/config.py`, `agent.py`, `eval.py`, `metrics.py`, `mlflow_logging.py`, and
+`pipeline/config.py`, `agents/`, `eval.py`, `metrics.py`, `mlflow_logging.py`, and
 `upload.py` respectively (see the `pipeline/` package table below).
 
 **Docker-outside-of-docker.** Each task container is a *sibling* of whatever process
@@ -97,6 +97,7 @@ Airflow params (all configurable from the UI, no hard-coded experiment values):
 | `split` | `"test"` | SWE-bench dataset split |
 | `subset` | `"verified"` | `lite` / `verified` / `full` |
 | `workers` | `5` | parallel workers for both agent and eval |
+| `harness` | `"mini-swe-agent"` | agent harness to run; `enum` mirrors `pipeline.agents.HARNESS_ADAPTERS` keys |
 | `model` | `nebius/moonshotai/Kimi-K2.6` | LiteLLM model id |
 | `task_slice` | `"0:3"` | instance slice, e.g. `0:3` |
 | `run_id` | `""` | explicit run id; auto-generated from `dag_run.run_id` if blank |
@@ -120,14 +121,15 @@ above) rather than a parsed JSON payload, these tasks don't need `do_xcom_push` 
 
 | Module | Responsibility |
 |---|---|
-| `config.py` | `build_run_config(params, fallback_run_id)` — resolves Airflow params into a full run config: sanitizes `run_id`, maps `subset` -> SWE-bench `dataset_name`, captures the current git SHA, stamps `created_at`. |
+| `config.py` | `build_run_config(params, fallback_run_id)` — resolves Airflow params into a full run config: sanitizes `run_id`, maps `subset` -> SWE-bench `dataset_name`, validates `harness` against `pipeline.agents.HARNESS_ADAPTERS`, captures the current git SHA, stamps `created_at`. |
 | `run_dir.py` | Filesystem helpers: `prepare_run_dir()` creates `runs/<run_id>/{run-agent,run-eval}` and writes `config.json`; `read_json`/`write_json`/`write_manifest`/`update_manifest_remote_uri` helpers. |
-| `agent.py` | `run_agent_batch()` — builds and runs `mini-extra swebench --subset --split --model --slice --workers --config --environment-class docker -o run-agent/`. `cost_limit` is passed as an inline `agent.cost_limit=<value>` config override (mini-swe-agent's `-c` flag supports `key=value` overrides merged on top of the base `swebench.yaml`). Writes `run-agent/_result.json`, `stdout.log`, `stderr.log`. |
+| `agents/__init__.py` | Harness registry: `HARNESS_ADAPTERS` maps a harness name to its adapter's *module path* (a string, not an already-imported callable), and `run_agent_batch(run_config, run_dir)` lazily `importlib.import_module`s only the selected harness's module before delegating. Keeps harnesses isolated — a second adapter's broken/missing optional dependency can't break runs that select a different harness — and documents the adapter contract every harness module must satisfy (write `run-agent/preds.json` + `_result.json` in the standard shape) so adding one is additive: one new module + one registry entry, no changes anywhere else in `pipeline/` or the DAG. |
+| `agents/mini_swe_agent.py` | The only adapter registered today. `run_agent_batch()` builds and runs `mini-extra swebench --subset --split --model --slice --workers --config --environment-class docker -o run-agent/`. `cost_limit` is passed as an inline `agent.cost_limit=<value>` config override (mini-swe-agent's `-c` flag supports `key=value` overrides merged on top of the base `swebench.yaml`). Writes `run-agent/_result.json`, `stdout.log`, `stderr.log`. |
 | `eval.py` | `run_swebench_eval()` — runs `python -m swebench.harness.run_evaluation --dataset_name --split --predictions_path --max_workers --run_id` with `cwd=run-eval/`, so the harness's own output (the `<model>.<run_id>.json` summary and `logs/run_evaluation/...`) lands inside the run folder. Writes `run-eval/_result.json`. |
 | `metrics.py` | `collect_metrics()` — parses the SWE-bench summary json into a flat dict (`resolved_instances`, `submitted_instances`, `resolve_rate`, ...). |
 | `mlflow_logging.py` | `log_mlflow_run()` — logs the run config as MLflow params, the metrics dict as MLflow metrics, and `config.json`/`metrics.json`/the eval summary json as artifacts. `log_remote_artifact_uri()` re-opens that same run later to attach the S3 URI once `upload.py` has produced one. Uses `MLFLOW_TRACKING_URI`/`MLFLOW_EXPERIMENT_NAME` env vars; if unset, mlflow falls back to its own local default (tracking metadata in a `./mlflow.db` sqlite file, artifacts under `./mlruns/`) — in `docker compose` mode these point at the `mlflow` service instead. |
 | `upload.py` | `upload_artifacts()` — uploads every file under `runs/<run_id>/` to `s3://$S3_BUCKET/runs/<run_id>/` via `boto3` (`S3_ENDPOINT_URL` makes this work against MinIO/Nebius Object Storage/real AWS S3 interchangeably), creating the bucket if it doesn't exist yet. Returns the resulting `remote_artifact_uri`. |
-| `subprocess_utils.py` | `run_logged()` — shared "run a subprocess, persist its stdout/stderr next to the step's output" helper used by `agent.py` and `eval.py` (each still decides for itself what counts as success). |
+| `subprocess_utils.py` | `run_logged()` — shared "run a subprocess, persist its stdout/stderr next to the step's output" helper used by `agents/mini_swe_agent.py` and `eval.py` (each still decides for itself what counts as success). |
 | `cli.py` | Dispatches `prepare-run` / `run-agent` / `run-eval` / `summarize` / `upload` subcommands. Every subcommand after `prepare-run` takes only `--run-dir`, reading whatever it needs from files already written into that directory — this is what lets the run folder be handed to someone else and fully understood without any external state. |
 
 ### Artifact layout produced per run
@@ -156,7 +158,7 @@ runs/<run_id>/
 Written last, by `summarize_and_log`, once everything else in the run folder exists.
 `pipeline.run_dir.write_manifest()` records where the predictions, trajectories, agent log, eval
 summary, eval logs, and metrics live, plus the run's `git_sha`, `created_at`, and the MLflow
-run/experiment/tracking-URI/artifact-URI it was logged to. `agent.py`/`eval.py` already record
+run/experiment/tracking-URI/artifact-URI it was logged to. `agents/mini_swe_agent.py`/`eval.py` already record
 their own outputs as paths relative to `run_dir` (e.g. `"run-agent/preds.json"`) rather than
 absolute paths, so `write_manifest` just reshapes what's already there instead of re-deriving
 relative paths later — the folder stays portable (copyable, uploadable) without any path
@@ -184,7 +186,7 @@ Remaining known gaps:
 - **Airflow-triggered `evaluate_agent`, end to end via `docker compose`, now verified.**
   Two real environment issues turned up going from "container mechanics verified directly"
   to "Airflow itself schedules them", both on a Windows/Docker Desktop host (not WSL2/Linux,
-  so not exactly the gotchas TESTING.md anticipated for a Linux host):
+  so not exactly the gotchas docs/TESTING.md anticipated for a Linux host):
   - **`DOCKER_GID` mismatch.** `airflow-scheduler`/`airflow-webserver` couldn't open the
     bind-mounted `/var/run/docker.sock` at all (`docker.errors.DockerException: Failed to
     establish connection to any given Docker hosts`) - Docker Desktop's socket is owned by
@@ -221,6 +223,14 @@ Remaining known gaps:
     `remote_artifact_uri` was filled in, so the remote copy permanently read `null` for the
     one field meant to point back at itself. Fixed by re-uploading just `manifest.json`
     after the local copy is patched (`upload_artifacts(..., only=["manifest.json"])`).
+- **Agent harness is now a pluggable `harness` param, not hard-coded to mini-swe-agent** — the
+  README frames agent quality as harness vs. model, but only `model` was a real experiment
+  variable until `pipeline/agents/` (registry + adapter contract, see the package table above)
+  and the DAG's `harness` param were added. `mini-swe-agent` is still the only registered
+  adapter: it's the only one of the tools worth comparing (Claude Code, Codex, OpenCode, Cursor)
+  that ships a built-in "run a slice of SWE-bench" batch command. Wiring up any of the others
+  needs its own dataset-loading + per-instance-container + patch-extraction loop, which doesn't
+  exist yet — this pass only built the extension point, not a second adapter.
 - **`docker-compose.yaml` is intentionally minimal** — `LocalExecutor` + Postgres, no
   Celery/Redis/worker/triggerer; fine at this project's single-DAG, single-VM scale, not a
   template for multi-worker production Airflow.
@@ -232,7 +242,7 @@ Remaining known gaps:
 
 ## How to Trigger
 
-(Full local dev setup, including WSL2/Docker gotchas, is in `TESTING.md`.)
+(Full local dev setup, including WSL2/Docker gotchas, is in `docs/TESTING.md`.)
 
 0. Build the pipeline image once (and after any change to `Dockerfile`/`pipeline/`):
    `docker build -t mlops-assignment-pipeline:latest .`

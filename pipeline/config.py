@@ -8,6 +8,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from pipeline.agents import HARNESS_ADAPTERS
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 # Bundled config name mini-extra resolves against its own package config dir.
@@ -54,6 +56,15 @@ def resolve_dataset_name(subset: str) -> str:
         ) from exc
 
 
+def _validate_harness(harness: str) -> str:
+    if harness not in HARNESS_ADAPTERS:
+        raise ValueError(
+            f"Unknown harness {harness!r}; expected one of {sorted(HARNESS_ADAPTERS)} "
+            "or register a new adapter in pipeline/agents/"
+        )
+    return harness
+
+
 def build_run_config(params: dict[str, Any], fallback_run_id: str) -> dict[str, Any]:
     """Resolve Airflow params into a fully-specified, JSON-serializable run config.
 
@@ -70,6 +81,7 @@ def build_run_config(params: dict[str, Any], fallback_run_id: str) -> dict[str, 
         "subset": subset,
         "dataset_name": resolve_dataset_name(subset),
         "workers": int(params["workers"]),
+        "harness": _validate_harness(str(params.get("harness") or "mini-swe-agent")),
         "model": str(params.get("model") or "nebius/moonshotai/Kimi-K2.6"),
         "task_slice": str(params.get("task_slice") or "0:3"),
         "cost_limit": float(params.get("cost_limit") if params.get("cost_limit") not in (None, "") else 3.0),

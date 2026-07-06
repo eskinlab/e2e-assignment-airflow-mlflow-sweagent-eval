@@ -1,5 +1,6 @@
 """Configurable run-agent -> run-eval -> summarize-and-log -> upload pipeline for
-evaluating mini-swe-agent on a slice of SWE-bench.
+evaluating an agent harness (mini-swe-agent by default; see `pipeline/agents/` for other
+registered adapters) on a slice of SWE-bench.
 
 Phase 3: every pipeline step runs as its own container (`DockerOperator`, built from the
 project `Dockerfile`) instead of a bare `uv run` subprocess on the Airflow host. This DAG
@@ -120,6 +121,13 @@ def _pipeline_step(
             description="SWE-bench subset",
         ),
         "workers": Param(5, type="integer", minimum=1, description="Parallel workers for agent + eval"),
+        # enum mirrors pipeline.agents.HARNESS_ADAPTERS' keys - keep in sync when adding adapters.
+        "harness": Param(
+            "mini-swe-agent",
+            type="string",
+            enum=["mini-swe-agent"],
+            description="Agent harness to run (see pipeline/agents/ for available adapters)",
+        ),
         "model": Param("nebius/moonshotai/Kimi-K2.6", type="string", description="LiteLLM model id"),
         "task_slice": Param("0:3", type="string", description="Instance slice, e.g. '0:3'"),
         "run_id": Param(
@@ -137,7 +145,7 @@ def _pipeline_step(
             ),
         ),
     },
-    tags=["swe-bench", "mini-swe-agent"],
+    tags=["swe-bench", "agent-eval"],
 )
 def evaluate_agent():
     # Both of these are plain Python (no Docker needed) so the run_dir every DockerOperator
