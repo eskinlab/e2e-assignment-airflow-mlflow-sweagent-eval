@@ -271,25 +271,26 @@ each `summarize_and_log` run logs the resolved run config as params, the
 artifacts.
 
 Example logged run (from `manifest.json` of the completed production-style run below,
-`run_id = manual__2026-07-05T21-41-19-00-00`):
+`run_id = manual__2026-07-06T14-29-17-00-00`):
 
 | Field | Value |
 |---|---|
-| `mlflow_run_id` | `9f63e4dc1bc648b79d2af1a70750b317` |
+| `mlflow_run_id` | `fb23f998415a4a859417c466a0051ac8` |
 | `mlflow_experiment_id` | `1` |
 | `mlflow_tracking_uri` | `http://mlflow:5000` |
-| `mlflow_artifact_uri` | `/mlflow/artifacts/1/9f63e4dc1bc648b79d2af1a70750b317/artifacts` |
-| `remote_artifact_uri` | `s3://mlops-assignment-runs/runs/manual__2026-07-05T21-41-19-00-00/` |
+| `mlflow_artifact_uri` | `/mlflow/artifacts/1/fb23f998415a4a859417c466a0051ac8/artifacts` |
+| `remote_artifact_uri` | `s3://mlops-assignment-runs/runs/manual__2026-07-06T14-29-17-00-00/` |
 
-![MLflow run showing params, metrics, and artifact URI](screenshots/mlflow_runs.png)
+![MLflow run showing params (including the new `harness` field), metrics, and artifact URI](screenshots/mlflow_runs.png)
 
 ## Completed Run
 
-`run_id = manual__2026-07-05T21-41-19-00-00`, params: `split=test`,
-`subset=verified` (`princeton-nlp/SWE-bench_Verified`), `task_slice=0:3`, `workers=5`,
-`model=nebius/moonshotai/Kimi-K2.6`, `cost_limit=3.0` — triggered from the Airflow UI against
-the `docker compose` stack (`postgres`/`mlflow`/`minio`/`airflow-scheduler`/`airflow-webserver`),
-each DAG task its own `DockerOperator` sibling container.
+`run_id = manual__2026-07-06T14-29-17-00-00`, params: `split=test`,
+`subset=verified` (`princeton-nlp/SWE-bench_Verified`), `task_slice=0:10`, `workers=5`,
+`harness=mini-swe-agent`, `model=nebius/meta-llama/Llama-3.1-8B-Instruct`, `cost_limit=3.0` —
+triggered from the Airflow UI against the `docker compose` stack
+(`postgres`/`mlflow`/`minio`/`airflow-scheduler`/`airflow-webserver`), each DAG task its own
+`DockerOperator` sibling container.
 
 ![Airflow Graph view, evaluate_agent run, all 7 nodes green](screenshots/airflow_dag.png)
 
@@ -297,31 +298,41 @@ All five `DockerOperator` tasks completed successfully (`run-agent/_result.json`
 `run-eval/_result.json` both `returncode: 0`), and `manifest.json` + `metrics.json` + the
 MLflow run + the S3 (MinIO) upload were all written — confirming the full
 `prepare_run -> run_agent -> run_eval -> summarize_and_log -> upload_artifacts` contract
-works end to end, scheduled by Airflow itself (not just run as bare containers by hand).
+works end to end, scheduled by Airflow itself (not just run as bare containers by hand),
+now with the `harness` param flowing through and showing up as a logged MLflow param.
 
-![MinIO object browser showing an uploaded runs/<run_id>/ folder](screenshots/object_storage_artifacts.png)
+![MinIO object browser showing an uploaded runs/<run_id>/ folder from an earlier verified run (manual__2026-07-05T21-31-00-00-00) - the layout is identical regardless of which run_id produced it](screenshots/object_storage_artifacts.png)
 
-None of the 3 evaluated instances (`astropy__astropy-12907`, `astropy__astropy-13236`,
-`astropy__astropy-13033`) were resolved (`resolve_rate: 0.0`, `resolved_instances: 0/3`,
-`empty_patch_instances: 3`). Root cause, per `run-agent/minisweagent.log`, is the same class
-of issue seen in earlier Phase 1/2 runs: each instance's SWE-bench Docker container
-(`sweb.eval.x86_64.astropy_*`) took longer than mini-swe-agent's 120s container-start
-timeout to come up (cold image pulls), so the agent aborted every instance and emitted an
-empty `model_patch`. This is an infra/timing issue in the agent run, not a pipeline bug —
-every downstream step (eval harness, metrics parsing, manifest, MLflow logging, S3 upload)
+None of the 10 evaluated instances (`astropy__astropy-12907`, `astropy__astropy-13033`,
+`astropy__astropy-13236`, `astropy__astropy-13398`, `astropy__astropy-13453`,
+`astropy__astropy-13579`, `astropy__astropy-13977`, `astropy__astropy-14096`,
+`astropy__astropy-14182`, `astropy__astropy-14309`) were resolved (`resolve_rate: 0.0`,
+`resolved_instances: 0/10`, `empty_patch_instances: 10`). Root cause this time, per
+`run-agent/minisweagent.log`, is **not** the earlier container-start-timeout issue — it's a
+bad `model` param: `nebius/meta-llama/Llama-3.1-8B-Instruct` isn't a real Nebius Token Factory
+model id, so every single litellm call 404'd (`litellm.NotFoundError`: "The model
+meta-llama/Llama-3.1-8B-Instruct does not exist."), and the agent emitted an empty
+`model_patch` for every instance. This is a bad experiment input, not a pipeline bug — every
+downstream step (eval harness, metrics parsing, manifest, MLflow logging, S3 upload) still
 correctly handled the empty-patch case and reported `unresolved`.
 
 Earlier runs (`manual__2026-07-04T11-40-38.739301-00-00`, `manual__2026-07-04T10-49-09.819199-00-00`,
-Phase 1/2, subprocess-based DAG) hit the identical failure mode on the same
-`astropy__astropy-12907` instance, consistent with the SWE-bench image not yet being cached
-locally in either environment.
+Phase 1/2, subprocess-based DAG) hit a *different* failure mode on the same
+`astropy__astropy-12907` instance: each instance's SWE-bench Docker container
+(`sweb.eval.x86_64.astropy_*`) took longer than mini-swe-agent's 120s container-start timeout
+to come up (cold image pulls), consistent with the SWE-bench image not yet being cached
+locally in either environment at that point.
 
 ## Rerun Instructions
 
 - **Re-run the same experiment**: trigger `evaluate_agent` again with the same
   `Configuration JSON` used above (or omit `run_id` to auto-generate a new one from the
-  Airflow `dag_run.run_id`). Since the SWE-bench image is now pulled locally, a retry is
-  expected to clear the container-start timeout seen above.
+  Airflow `dag_run.run_id`). Note the run documented above used an invalid `model` id
+  (`nebius/meta-llama/Llama-3.1-8B-Instruct`, which 404s) - fix that param (e.g. back to the
+  default `nebius/moonshotai/Kimi-K2.6`) before re-running, or you'll reproduce the same
+  all-empty-patches result for a different reason than intended. Separately, the SWE-bench
+  image is now pulled locally, so the earlier container-start-timeout failure mode shouldn't
+  recur either way.
 - **Retry only a failed step** without redoing earlier work: in the Airflow UI, click the
   failed task -> **Clear** (also re-runs its downstream tasks). E.g. clearing `run_eval`
   reuses the existing `run-agent/preds.json` and only re-runs eval + summarize.

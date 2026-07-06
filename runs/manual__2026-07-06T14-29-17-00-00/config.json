@@ -1,0 +1,14 @@
+{
+  "cost_limit": 3.0,
+  "created_at": "2026-07-06T14:29:58.742842+00:00",
+  "dataset_name": "princeton-nlp/SWE-bench_Verified",
+  "git_sha": "0049e5f",
+  "harness": "mini-swe-agent",
+  "model": "nebius/meta-llama/Llama-3.1-8B-Instruct",
+  "mswea_config": "swebench.yaml",
+  "run_id": "manual__2026-07-06T14-29-17-00-00",
+  "split": "test",
+  "subset": "verified",
+  "task_slice": "0:10",
+  "workers": 5
+}

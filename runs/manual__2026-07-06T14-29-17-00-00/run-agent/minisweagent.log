@@ -1,0 +1,1094 @@
+2026-07-06 14:30:08,871 - minisweagent - INFO - Loading dataset princeton-nlp/SWE-Bench_Verified, split test...
+2026-07-06 14:30:23,200 - minisweagent - INFO - Instance slice: 500 -> 10 instances
+2026-07-06 14:30:23,203 - minisweagent - INFO - Running on 10 instances...
+2026-07-06 14:30:23,204 - minisweagent - INFO - Building agent config from specs: ['swebench.yaml', 'agent.cost_limit=3.0']
+2026-07-06 14:30:27,664 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-207832a3 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-12907:latest sleep 2h
+2026-07-06 14:30:27,665 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-2bca877a -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-13033:latest sleep 2h
+2026-07-06 14:30:27,665 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-eec1e133 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-13236:latest sleep 2h
+2026-07-06 14:30:27,666 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-918c6804 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-13453:latest sleep 2h
+2026-07-06 14:30:27,665 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-87d0b0ff -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-13398:latest sleep 2h
+2026-07-06 14:31:25,716 - minisweagent.environment - INFO - Started container minisweagent-eec1e133 with ID 3eaaee44f1b40d414d049ce0d3087584247bb37515bd6044250325dc854650d4
+2026-07-06 14:31:25,719 - minisweagent.environment - INFO - Started container minisweagent-2bca877a with ID 7436ed3b89f9de41034d013c4bb7ba07fb91c8d9e1ebb3a7d2a8e9d9546e3c24
+2026-07-06 14:31:31,378 - minisweagent - ERROR - Error processing instance astropy__astropy-13236: litellm.NotFoundError: NotFoundError: NebiusException - Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 852, in completion
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 780, in completion
+    ) = self.make_sync_openai_chat_completion_request(
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        openai_client=openai_client,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        logging_obj=logging_obj,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/logging_utils.py", line 344, in sync_wrapper
+    result = func(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 503, in make_sync_openai_chat_completion_request
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 478, in make_sync_openai_chat_completion_request
+    raw_response = openai_client.chat.completions.with_raw_response.create(
+        **data, timeout=timeout
+    )
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_legacy_response.py", line 367, in wrapped
+    return cast(LegacyAPIResponse[R], func(*args, **kwargs))
+                                      ~~~~^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_utils/_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/resources/chat/completions/completions.py", line 1251, in create
+    return self._post(
+           ~~~~~~~~~~^
+        "/chat/completions",
+        ^^^^^^^^^^^^^^^^^^^^
+    ...<52 lines>...
+        stream_cls=Stream[ChatCompletionChunk],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.NotFoundError: Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 2781, in completion
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 2753, in completion
+    response = openai_chat_completions.completion(
+        model=model,
+    ...<16 lines>...
+        shared_session=shared_session,
+    )
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 863, in completion
+    raise OpenAIError(
+    ...<4 lines>...
+    )
+litellm.llms.openai.common_utils.OpenAIError: Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/swebench.py", line 154, in process_instance
+    info = agent.run(task)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 98, in run
+    self.step()
+    ~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/utils/common.py", line 17, in step
+    return super().step()
+           ~~~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 126, in step
+    return self.execute_actions(self.query())
+                                ~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 147, in query
+    message = self.model.query(self.messages)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 82, in query
+    for attempt in retry(logger=logger, abort_exceptions=self.abort_exceptions):
+                   ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 438, in __iter__
+    do = self.iter(retry_state=retry_state)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 393, in <lambda>
+    self._add_action_func(lambda rs: rs.outcome.result())
+                                     ~~~~~~~~~~~~~~~~~^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/concurrent/futures/_base.py", line 447, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/concurrent/futures/_base.py", line 396, in __get_result
+    raise self._exception
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 84, in query
+    response = self._query(self._prepare_messages_for_api(messages), **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 66, in _query
+    return litellm.completion(
+           ~~~~~~~~~~~~~~~~~~^
+        model=self.config.model_name,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        **(self.config.model_kwargs | kwargs),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/utils.py", line 1775, in wrapper
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/utils.py", line 1596, in wrapper
+    result = original_function(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 4614, in completion
+    raise exception_type(
+          ~~~~~~~~~~~~~~^
+        model=model,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        extra_kwargs=kwargs,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2473, in exception_type
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 562, in exception_type
+    raise NotFoundError(
+    ...<5 lines>...
+    )
+litellm.exceptions.NotFoundError: litellm.NotFoundError: NotFoundError: NebiusException - Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+2026-07-06 14:31:31,385 - minisweagent - ERROR - Error processing instance astropy__astropy-13033: litellm.NotFoundError: NotFoundError: NebiusException - Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 852, in completion
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 780, in completion
+    ) = self.make_sync_openai_chat_completion_request(
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        openai_client=openai_client,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        logging_obj=logging_obj,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/logging_utils.py", line 344, in sync_wrapper
+    result = func(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 503, in make_sync_openai_chat_completion_request
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 478, in make_sync_openai_chat_completion_request
+    raw_response = openai_client.chat.completions.with_raw_response.create(
+        **data, timeout=timeout
+    )
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_legacy_response.py", line 367, in wrapped
+    return cast(LegacyAPIResponse[R], func(*args, **kwargs))
+                                      ~~~~^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_utils/_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/resources/chat/completions/completions.py", line 1251, in create
+    return self._post(
+           ~~~~~~~~~~^
+        "/chat/completions",
+        ^^^^^^^^^^^^^^^^^^^^
+    ...<52 lines>...
+        stream_cls=Stream[ChatCompletionChunk],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.NotFoundError: Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 2781, in completion
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 2753, in completion
+    response = openai_chat_completions.completion(
+        model=model,
+    ...<16 lines>...
+        shared_session=shared_session,
+    )
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 863, in completion
+    raise OpenAIError(
+    ...<4 lines>...
+    )
+litellm.llms.openai.common_utils.OpenAIError: Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/swebench.py", line 154, in process_instance
+    info = agent.run(task)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 98, in run
+    self.step()
+    ~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/utils/common.py", line 17, in step
+    return super().step()
+           ~~~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 126, in step
+    return self.execute_actions(self.query())
+                                ~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 147, in query
+    message = self.model.query(self.messages)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 82, in query
+    for attempt in retry(logger=logger, abort_exceptions=self.abort_exceptions):
+                   ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 438, in __iter__
+    do = self.iter(retry_state=retry_state)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 393, in <lambda>
+    self._add_action_func(lambda rs: rs.outcome.result())
+                                     ~~~~~~~~~~~~~~~~~^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/concurrent/futures/_base.py", line 447, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/concurrent/futures/_base.py", line 396, in __get_result
+    raise self._exception
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 84, in query
+    response = self._query(self._prepare_messages_for_api(messages), **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 66, in _query
+    return litellm.completion(
+           ~~~~~~~~~~~~~~~~~~^
+        model=self.config.model_name,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        **(self.config.model_kwargs | kwargs),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/utils.py", line 1775, in wrapper
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/utils.py", line 1596, in wrapper
+    result = original_function(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 4614, in completion
+    raise exception_type(
+          ~~~~~~~~~~~~~~^
+        model=model,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        extra_kwargs=kwargs,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2473, in exception_type
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 562, in exception_type
+    raise NotFoundError(
+    ...<5 lines>...
+    )
+litellm.exceptions.NotFoundError: litellm.NotFoundError: NotFoundError: NebiusException - Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+2026-07-06 14:31:31,434 - minisweagent - INFO - Saved trajectory to '/mlops-assignment/runs/manual__2026-07-06T14-29-17-00-00/run-agent/astropy__astropy-13236/astropy__astropy-13236.traj.json'
+2026-07-06 14:31:31,452 - minisweagent - INFO - Saved trajectory to '/mlops-assignment/runs/manual__2026-07-06T14-29-17-00-00/run-agent/astropy__astropy-13033/astropy__astropy-13033.traj.json'
+2026-07-06 14:31:31,522 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-0e721794 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-13579:latest sleep 2h
+2026-07-06 14:31:31,524 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-d980ce5e -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-13977:latest sleep 2h
+2026-07-06 14:31:39,612 - minisweagent.environment - INFO - Started container minisweagent-0e721794 with ID 62c81a1384dd2b8412fe156126c9e37fbc6675df2c70175dd100c7288b4c7bd5
+2026-07-06 14:31:40,801 - minisweagent - ERROR - Error processing instance astropy__astropy-13579: litellm.NotFoundError: NotFoundError: NebiusException - Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 852, in completion
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 780, in completion
+    ) = self.make_sync_openai_chat_completion_request(
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        openai_client=openai_client,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        logging_obj=logging_obj,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/logging_utils.py", line 344, in sync_wrapper
+    result = func(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 503, in make_sync_openai_chat_completion_request
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 478, in make_sync_openai_chat_completion_request
+    raw_response = openai_client.chat.completions.with_raw_response.create(
+        **data, timeout=timeout
+    )
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_legacy_response.py", line 367, in wrapped
+    return cast(LegacyAPIResponse[R], func(*args, **kwargs))
+                                      ~~~~^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_utils/_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/resources/chat/completions/completions.py", line 1251, in create
+    return self._post(
+           ~~~~~~~~~~^
+        "/chat/completions",
+        ^^^^^^^^^^^^^^^^^^^^
+    ...<52 lines>...
+        stream_cls=Stream[ChatCompletionChunk],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.NotFoundError: Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 2781, in completion
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 2753, in completion
+    response = openai_chat_completions.completion(
+        model=model,
+    ...<16 lines>...
+        shared_session=shared_session,
+    )
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 863, in completion
+    raise OpenAIError(
+    ...<4 lines>...
+    )
+litellm.llms.openai.common_utils.OpenAIError: Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/swebench.py", line 154, in process_instance
+    info = agent.run(task)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 98, in run
+    self.step()
+    ~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/utils/common.py", line 17, in step
+    return super().step()
+           ~~~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 126, in step
+    return self.execute_actions(self.query())
+                                ~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 147, in query
+    message = self.model.query(self.messages)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 82, in query
+    for attempt in retry(logger=logger, abort_exceptions=self.abort_exceptions):
+                   ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 438, in __iter__
+    do = self.iter(retry_state=retry_state)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 393, in <lambda>
+    self._add_action_func(lambda rs: rs.outcome.result())
+                                     ~~~~~~~~~~~~~~~~~^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/concurrent/futures/_base.py", line 447, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/concurrent/futures/_base.py", line 396, in __get_result
+    raise self._exception
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 84, in query
+    response = self._query(self._prepare_messages_for_api(messages), **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 66, in _query
+    return litellm.completion(
+           ~~~~~~~~~~~~~~~~~~^
+        model=self.config.model_name,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        **(self.config.model_kwargs | kwargs),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/utils.py", line 1775, in wrapper
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/utils.py", line 1596, in wrapper
+    result = original_function(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 4614, in completion
+    raise exception_type(
+          ~~~~~~~~~~~~~~^
+        model=model,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        extra_kwargs=kwargs,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2473, in exception_type
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 562, in exception_type
+    raise NotFoundError(
+    ...<5 lines>...
+    )
+litellm.exceptions.NotFoundError: litellm.NotFoundError: NotFoundError: NebiusException - Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+2026-07-06 14:31:40,831 - minisweagent - INFO - Saved trajectory to '/mlops-assignment/runs/manual__2026-07-06T14-29-17-00-00/run-agent/astropy__astropy-13579/astropy__astropy-13579.traj.json'
+2026-07-06 14:31:40,864 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-dc1b8a3c -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-14096:latest sleep 2h
+2026-07-06 14:32:06,135 - minisweagent.environment - INFO - Started container minisweagent-207832a3 with ID e8810ad22b247500e763cb7078283c99b350653eac1e8f2eaabc29fa4ec39581
+2026-07-06 14:32:06,657 - minisweagent - ERROR - Error processing instance astropy__astropy-12907: litellm.NotFoundError: NotFoundError: NebiusException - Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 852, in completion
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 780, in completion
+    ) = self.make_sync_openai_chat_completion_request(
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        openai_client=openai_client,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        logging_obj=logging_obj,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/logging_utils.py", line 344, in sync_wrapper
+    result = func(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 503, in make_sync_openai_chat_completion_request
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 478, in make_sync_openai_chat_completion_request
+    raw_response = openai_client.chat.completions.with_raw_response.create(
+        **data, timeout=timeout
+    )
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_legacy_response.py", line 367, in wrapped
+    return cast(LegacyAPIResponse[R], func(*args, **kwargs))
+                                      ~~~~^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_utils/_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/resources/chat/completions/completions.py", line 1251, in create
+    return self._post(
+           ~~~~~~~~~~^
+        "/chat/completions",
+        ^^^^^^^^^^^^^^^^^^^^
+    ...<52 lines>...
+        stream_cls=Stream[ChatCompletionChunk],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.NotFoundError: Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 2781, in completion
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 2753, in completion
+    response = openai_chat_completions.completion(
+        model=model,
+    ...<16 lines>...
+        shared_session=shared_session,
+    )
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 863, in completion
+    raise OpenAIError(
+    ...<4 lines>...
+    )
+litellm.llms.openai.common_utils.OpenAIError: Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/swebench.py", line 154, in process_instance
+    info = agent.run(task)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 98, in run
+    self.step()
+    ~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/utils/common.py", line 17, in step
+    return super().step()
+           ~~~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 126, in step
+    return self.execute_actions(self.query())
+                                ~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 147, in query
+    message = self.model.query(self.messages)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 82, in query
+    for attempt in retry(logger=logger, abort_exceptions=self.abort_exceptions):
+                   ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 438, in __iter__
+    do = self.iter(retry_state=retry_state)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 393, in <lambda>
+    self._add_action_func(lambda rs: rs.outcome.result())
+                                     ~~~~~~~~~~~~~~~~~^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/concurrent/futures/_base.py", line 447, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/concurrent/futures/_base.py", line 396, in __get_result
+    raise self._exception
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 84, in query
+    response = self._query(self._prepare_messages_for_api(messages), **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 66, in _query
+    return litellm.completion(
+           ~~~~~~~~~~~~~~~~~~^
+        model=self.config.model_name,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        **(self.config.model_kwargs | kwargs),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/utils.py", line 1775, in wrapper
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/utils.py", line 1596, in wrapper
+    result = original_function(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 4614, in completion
+    raise exception_type(
+          ~~~~~~~~~~~~~~^
+        model=model,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        extra_kwargs=kwargs,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2473, in exception_type
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 562, in exception_type
+    raise NotFoundError(
+    ...<5 lines>...
+    )
+litellm.exceptions.NotFoundError: litellm.NotFoundError: NotFoundError: NebiusException - Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+2026-07-06 14:32:06,685 - minisweagent - INFO - Saved trajectory to '/mlops-assignment/runs/manual__2026-07-06T14-29-17-00-00/run-agent/astropy__astropy-12907/astropy__astropy-12907.traj.json'
+2026-07-06 14:32:06,706 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-d25396f4 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-14182:latest sleep 2h
+2026-07-06 14:32:27,689 - minisweagent - ERROR - Error processing instance astropy__astropy-13453: Command '['docker', 'run', '-d', '--name', 'minisweagent-918c6804', '-w', '/testbed', '--rm', 'docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-13453:latest', 'sleep', '2h']' timed out after 120 seconds
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/swebench.py", line 146, in process_instance
+    env = get_sb_environment(config, instance)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/swebench.py", line 88, in get_sb_environment
+    env = get_environment(env_config)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/environments/__init__.py", line 33, in get_environment
+    return get_environment_class(environment_class)(**config)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/environments/docker.py", line 59, in __init__
+    self._start_container()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/environments/docker.py", line 91, in _start_container
+    result = subprocess.run(
+        cmd,
+    ...<3 lines>...
+        check=True,
+    )
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/subprocess.py", line 557, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/subprocess.py", line 1221, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/subprocess.py", line 2154, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/subprocess.py", line 1268, in _check_timeout
+    raise TimeoutExpired(
+    ...<2 lines>...
+            stderr=b''.join(stderr_seq) if stderr_seq else None)
+subprocess.TimeoutExpired: Command '['docker', 'run', '-d', '--name', 'minisweagent-918c6804', '-w', '/testbed', '--rm', 'docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-13453:latest', 'sleep', '2h']' timed out after 120 seconds
+2026-07-06 14:32:27,725 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-11a0e346 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-14309:latest sleep 2h
+2026-07-06 14:32:27,747 - minisweagent - ERROR - Error processing instance astropy__astropy-13398: Command '['docker', 'run', '-d', '--name', 'minisweagent-87d0b0ff', '-w', '/testbed', '--rm', 'docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-13398:latest', 'sleep', '2h']' timed out after 120 seconds
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/swebench.py", line 146, in process_instance
+    env = get_sb_environment(config, instance)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/swebench.py", line 88, in get_sb_environment
+    env = get_environment(env_config)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/environments/__init__.py", line 33, in get_environment
+    return get_environment_class(environment_class)(**config)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/environments/docker.py", line 59, in __init__
+    self._start_container()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/environments/docker.py", line 91, in _start_container
+    result = subprocess.run(
+        cmd,
+    ...<3 lines>...
+        check=True,
+    )
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/subprocess.py", line 557, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/subprocess.py", line 1221, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/subprocess.py", line 2154, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/subprocess.py", line 1268, in _check_timeout
+    raise TimeoutExpired(
+    ...<2 lines>...
+            stderr=b''.join(stderr_seq) if stderr_seq else None)
+subprocess.TimeoutExpired: Command '['docker', 'run', '-d', '--name', 'minisweagent-87d0b0ff', '-w', '/testbed', '--rm', 'docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-13398:latest', 'sleep', '2h']' timed out after 120 seconds
+2026-07-06 14:32:44,981 - minisweagent.environment - INFO - Started container minisweagent-dc1b8a3c with ID 81061a447dc30f92066ebdb34fac07bb0bf7983fc51d063c39dcf0459fe5a320
+2026-07-06 14:32:45,614 - minisweagent - ERROR - Error processing instance astropy__astropy-14096: litellm.NotFoundError: NotFoundError: NebiusException - Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 852, in completion
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 780, in completion
+    ) = self.make_sync_openai_chat_completion_request(
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        openai_client=openai_client,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        logging_obj=logging_obj,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/logging_utils.py", line 344, in sync_wrapper
+    result = func(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 503, in make_sync_openai_chat_completion_request
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 478, in make_sync_openai_chat_completion_request
+    raw_response = openai_client.chat.completions.with_raw_response.create(
+        **data, timeout=timeout
+    )
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_legacy_response.py", line 367, in wrapped
+    return cast(LegacyAPIResponse[R], func(*args, **kwargs))
+                                      ~~~~^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_utils/_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/resources/chat/completions/completions.py", line 1251, in create
+    return self._post(
+           ~~~~~~~~~~^
+        "/chat/completions",
+        ^^^^^^^^^^^^^^^^^^^^
+    ...<52 lines>...
+        stream_cls=Stream[ChatCompletionChunk],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.NotFoundError: Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 2781, in completion
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 2753, in completion
+    response = openai_chat_completions.completion(
+        model=model,
+    ...<16 lines>...
+        shared_session=shared_session,
+    )
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 863, in completion
+    raise OpenAIError(
+    ...<4 lines>...
+    )
+litellm.llms.openai.common_utils.OpenAIError: Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/swebench.py", line 154, in process_instance
+    info = agent.run(task)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 98, in run
+    self.step()
+    ~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/utils/common.py", line 17, in step
+    return super().step()
+           ~~~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 126, in step
+    return self.execute_actions(self.query())
+                                ~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 147, in query
+    message = self.model.query(self.messages)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 82, in query
+    for attempt in retry(logger=logger, abort_exceptions=self.abort_exceptions):
+                   ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 438, in __iter__
+    do = self.iter(retry_state=retry_state)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 393, in <lambda>
+    self._add_action_func(lambda rs: rs.outcome.result())
+                                     ~~~~~~~~~~~~~~~~~^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/concurrent/futures/_base.py", line 447, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/concurrent/futures/_base.py", line 396, in __get_result
+    raise self._exception
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 84, in query
+    response = self._query(self._prepare_messages_for_api(messages), **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 66, in _query
+    return litellm.completion(
+           ~~~~~~~~~~~~~~~~~~^
+        model=self.config.model_name,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        **(self.config.model_kwargs | kwargs),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/utils.py", line 1775, in wrapper
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/utils.py", line 1596, in wrapper
+    result = original_function(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 4614, in completion
+    raise exception_type(
+          ~~~~~~~~~~~~~~^
+        model=model,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        extra_kwargs=kwargs,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2473, in exception_type
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 562, in exception_type
+    raise NotFoundError(
+    ...<5 lines>...
+    )
+litellm.exceptions.NotFoundError: litellm.NotFoundError: NotFoundError: NebiusException - Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+2026-07-06 14:32:45,642 - minisweagent - INFO - Saved trajectory to '/mlops-assignment/runs/manual__2026-07-06T14-29-17-00-00/run-agent/astropy__astropy-14096/astropy__astropy-14096.traj.json'
+2026-07-06 14:32:54,232 - minisweagent.environment - INFO - Started container minisweagent-d25396f4 with ID 1314139cf2089d3172d71b854ee929b6a05cc9016649b1216a5a29b4c6ffe68c
+2026-07-06 14:32:54,892 - minisweagent - ERROR - Error processing instance astropy__astropy-14182: litellm.NotFoundError: NotFoundError: NebiusException - Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 852, in completion
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 780, in completion
+    ) = self.make_sync_openai_chat_completion_request(
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        openai_client=openai_client,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        logging_obj=logging_obj,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/logging_utils.py", line 344, in sync_wrapper
+    result = func(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 503, in make_sync_openai_chat_completion_request
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 478, in make_sync_openai_chat_completion_request
+    raw_response = openai_client.chat.completions.with_raw_response.create(
+        **data, timeout=timeout
+    )
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_legacy_response.py", line 367, in wrapped
+    return cast(LegacyAPIResponse[R], func(*args, **kwargs))
+                                      ~~~~^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_utils/_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/resources/chat/completions/completions.py", line 1251, in create
+    return self._post(
+           ~~~~~~~~~~^
+        "/chat/completions",
+        ^^^^^^^^^^^^^^^^^^^^
+    ...<52 lines>...
+        stream_cls=Stream[ChatCompletionChunk],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.NotFoundError: Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 2781, in completion
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 2753, in completion
+    response = openai_chat_completions.completion(
+        model=model,
+    ...<16 lines>...
+        shared_session=shared_session,
+    )
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 863, in completion
+    raise OpenAIError(
+    ...<4 lines>...
+    )
+litellm.llms.openai.common_utils.OpenAIError: Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/swebench.py", line 154, in process_instance
+    info = agent.run(task)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 98, in run
+    self.step()
+    ~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/utils/common.py", line 17, in step
+    return super().step()
+           ~~~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 126, in step
+    return self.execute_actions(self.query())
+                                ~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 147, in query
+    message = self.model.query(self.messages)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 82, in query
+    for attempt in retry(logger=logger, abort_exceptions=self.abort_exceptions):
+                   ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 438, in __iter__
+    do = self.iter(retry_state=retry_state)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 393, in <lambda>
+    self._add_action_func(lambda rs: rs.outcome.result())
+                                     ~~~~~~~~~~~~~~~~~^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/concurrent/futures/_base.py", line 447, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/concurrent/futures/_base.py", line 396, in __get_result
+    raise self._exception
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 84, in query
+    response = self._query(self._prepare_messages_for_api(messages), **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 66, in _query
+    return litellm.completion(
+           ~~~~~~~~~~~~~~~~~~^
+        model=self.config.model_name,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        **(self.config.model_kwargs | kwargs),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/utils.py", line 1775, in wrapper
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/utils.py", line 1596, in wrapper
+    result = original_function(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 4614, in completion
+    raise exception_type(
+          ~~~~~~~~~~~~~~^
+        model=model,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        extra_kwargs=kwargs,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2473, in exception_type
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 562, in exception_type
+    raise NotFoundError(
+    ...<5 lines>...
+    )
+litellm.exceptions.NotFoundError: litellm.NotFoundError: NotFoundError: NebiusException - Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+2026-07-06 14:32:54,920 - minisweagent - INFO - Saved trajectory to '/mlops-assignment/runs/manual__2026-07-06T14-29-17-00-00/run-agent/astropy__astropy-14182/astropy__astropy-14182.traj.json'
+2026-07-06 14:33:00,136 - minisweagent.environment - INFO - Started container minisweagent-d980ce5e with ID 7d692b0eb7a5deef8d67bdb633f2020847661afb6e4b025706747e156ee5e3d7
+2026-07-06 14:33:03,651 - minisweagent.environment - INFO - Started container minisweagent-11a0e346 with ID bc10d8610cef29644e07c8f09f245d2737f472b5314969de8601779762610fb3
+2026-07-06 14:33:04,516 - minisweagent - ERROR - Error processing instance astropy__astropy-13977: litellm.NotFoundError: NotFoundError: NebiusException - Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 852, in completion
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 780, in completion
+    ) = self.make_sync_openai_chat_completion_request(
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        openai_client=openai_client,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        logging_obj=logging_obj,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/logging_utils.py", line 344, in sync_wrapper
+    result = func(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 503, in make_sync_openai_chat_completion_request
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 478, in make_sync_openai_chat_completion_request
+    raw_response = openai_client.chat.completions.with_raw_response.create(
+        **data, timeout=timeout
+    )
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_legacy_response.py", line 367, in wrapped
+    return cast(LegacyAPIResponse[R], func(*args, **kwargs))
+                                      ~~~~^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_utils/_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/resources/chat/completions/completions.py", line 1251, in create
+    return self._post(
+           ~~~~~~~~~~^
+        "/chat/completions",
+        ^^^^^^^^^^^^^^^^^^^^
+    ...<52 lines>...
+        stream_cls=Stream[ChatCompletionChunk],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.NotFoundError: Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 2781, in completion
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 2753, in completion
+    response = openai_chat_completions.completion(
+        model=model,
+    ...<16 lines>...
+        shared_session=shared_session,
+    )
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 863, in completion
+    raise OpenAIError(
+    ...<4 lines>...
+    )
+litellm.llms.openai.common_utils.OpenAIError: Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/swebench.py", line 154, in process_instance
+    info = agent.run(task)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 98, in run
+    self.step()
+    ~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/utils/common.py", line 17, in step
+    return super().step()
+           ~~~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 126, in step
+    return self.execute_actions(self.query())
+                                ~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 147, in query
+    message = self.model.query(self.messages)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 82, in query
+    for attempt in retry(logger=logger, abort_exceptions=self.abort_exceptions):
+                   ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 438, in __iter__
+    do = self.iter(retry_state=retry_state)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 393, in <lambda>
+    self._add_action_func(lambda rs: rs.outcome.result())
+                                     ~~~~~~~~~~~~~~~~~^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/concurrent/futures/_base.py", line 447, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/concurrent/futures/_base.py", line 396, in __get_result
+    raise self._exception
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 84, in query
+    response = self._query(self._prepare_messages_for_api(messages), **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 66, in _query
+    return litellm.completion(
+           ~~~~~~~~~~~~~~~~~~^
+        model=self.config.model_name,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        **(self.config.model_kwargs | kwargs),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/utils.py", line 1775, in wrapper
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/utils.py", line 1596, in wrapper
+    result = original_function(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 4614, in completion
+    raise exception_type(
+          ~~~~~~~~~~~~~~^
+        model=model,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        extra_kwargs=kwargs,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2473, in exception_type
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 562, in exception_type
+    raise NotFoundError(
+    ...<5 lines>...
+    )
+litellm.exceptions.NotFoundError: litellm.NotFoundError: NotFoundError: NebiusException - Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+2026-07-06 14:33:04,578 - minisweagent - INFO - Saved trajectory to '/mlops-assignment/runs/manual__2026-07-06T14-29-17-00-00/run-agent/astropy__astropy-13977/astropy__astropy-13977.traj.json'
+2026-07-06 14:33:05,670 - minisweagent - ERROR - Error processing instance astropy__astropy-14309: litellm.NotFoundError: NotFoundError: NebiusException - Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 852, in completion
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 780, in completion
+    ) = self.make_sync_openai_chat_completion_request(
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        openai_client=openai_client,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        logging_obj=logging_obj,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/logging_utils.py", line 344, in sync_wrapper
+    result = func(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 503, in make_sync_openai_chat_completion_request
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 478, in make_sync_openai_chat_completion_request
+    raw_response = openai_client.chat.completions.with_raw_response.create(
+        **data, timeout=timeout
+    )
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_legacy_response.py", line 367, in wrapped
+    return cast(LegacyAPIResponse[R], func(*args, **kwargs))
+                                      ~~~~^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_utils/_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/resources/chat/completions/completions.py", line 1251, in create
+    return self._post(
+           ~~~~~~~~~~^
+        "/chat/completions",
+        ^^^^^^^^^^^^^^^^^^^^
+    ...<52 lines>...
+        stream_cls=Stream[ChatCompletionChunk],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.NotFoundError: Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 2781, in completion
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 2753, in completion
+    response = openai_chat_completions.completion(
+        model=model,
+    ...<16 lines>...
+        shared_session=shared_session,
+    )
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/llms/openai/openai.py", line 863, in completion
+    raise OpenAIError(
+    ...<4 lines>...
+    )
+litellm.llms.openai.common_utils.OpenAIError: Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/swebench.py", line 154, in process_instance
+    info = agent.run(task)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 98, in run
+    self.step()
+    ~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/run/benchmarks/utils/common.py", line 17, in step
+    return super().step()
+           ~~~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 126, in step
+    return self.execute_actions(self.query())
+                                ~~~~~~~~~~^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/agents/default.py", line 147, in query
+    message = self.model.query(self.messages)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 82, in query
+    for attempt in retry(logger=logger, abort_exceptions=self.abort_exceptions):
+                   ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 438, in __iter__
+    do = self.iter(retry_state=retry_state)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 393, in <lambda>
+    self._add_action_func(lambda rs: rs.outcome.result())
+                                     ~~~~~~~~~~~~~~~~~^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/concurrent/futures/_base.py", line 447, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/concurrent/futures/_base.py", line 396, in __get_result
+    raise self._exception
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 84, in query
+    response = self._query(self._prepare_messages_for_api(messages), **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/minisweagent/models/litellm_model.py", line 66, in _query
+    return litellm.completion(
+           ~~~~~~~~~~~~~~~~~~^
+        model=self.config.model_name,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        **(self.config.model_kwargs | kwargs),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/utils.py", line 1775, in wrapper
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/utils.py", line 1596, in wrapper
+    result = original_function(*args, **kwargs)
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/main.py", line 4614, in completion
+    raise exception_type(
+          ~~~~~~~~~~~~~~^
+        model=model,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        extra_kwargs=kwargs,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2473, in exception_type
+    raise e
+  File "/mlops-assignment/.venv/lib/python3.14/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 562, in exception_type
+    raise NotFoundError(
+    ...<5 lines>...
+    )
+litellm.exceptions.NotFoundError: litellm.NotFoundError: NotFoundError: NebiusException - Error code: 404 - {'detail': 'The model `meta-llama/Llama-3.1-8B-Instruct` does not exist.'}
+2026-07-06 14:33:05,740 - minisweagent - INFO - Saved trajectory to '/mlops-assignment/runs/manual__2026-07-06T14-29-17-00-00/run-agent/astropy__astropy-14309/astropy__astropy-14309.traj.json'
